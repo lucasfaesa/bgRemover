@@ -60,22 +60,28 @@
     }
     .opt-group { display: flex; flex-direction: column; gap: 6px; }
     .opt-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-    .seg {
-      display: flex;
+    select {
+      background: var(--surface2);
       border: 1px solid var(--border);
+      color: var(--text);
       border-radius: 7px;
-      overflow: hidden;
-    }
-    .seg input[type=radio] { display: none; }
-    .seg label {
-      padding: 5px 14px;
-      font-size: 0.83rem;
+      padding: 6px 10px;
+      font-size: 0.875rem;
+      font-family: inherit;
       cursor: pointer;
-      color: var(--muted);
-      transition: background 0.15s, color 0.15s;
-      user-select: none;
+      outline: none;
     }
-    .seg input[type=radio]:checked + label { background: var(--accent); color: #fff; }
+    select:focus { border-color: var(--accent); }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
     .slider-row { display: flex; align-items: center; gap: 10px; }
     input[type=range] {
       -webkit-appearance: none;
@@ -190,12 +196,10 @@
   <div class="options">
     <div class="opt-group">
       <div class="opt-label">Model</div>
-      <div class="seg">
-        <input type="radio" name="model" id="m-fast"    value="small">
-        <label for="m-fast">Fast</label>
-        <input type="radio" name="model" id="m-quality" value="medium" checked>
-        <label for="m-quality">Quality</label>
-      </div>
+      <select id="modelSelect">
+        <option value="small">General (faster)</option>
+        <option value="medium" selected>Quality (recommended)</option>
+      </select>
     </div>
     <div class="opt-group">
       <div class="opt-label">Edge Feather</div>
@@ -203,6 +207,13 @@
         <input type="range" id="feather" min="0" max="3" step="0.5" value="1">
         <span id="featherVal">1.0</span>
       </div>
+    </div>
+    <div class="opt-group" style="justify-content:flex-end;">
+      <div class="opt-label">&nbsp;</div>
+      <label class="checkbox-label">
+        <input type="checkbox" id="enhanceCheck">
+        Better edge quality (slower)
+      </label>
     </div>
   </div>
 
@@ -238,6 +249,8 @@
     const modelLabel = document.getElementById('modelLabel');
     const featherSlider = document.getElementById('feather');
     const featherVal    = document.getElementById('featherVal');
+    const modelSelect   = document.getElementById('modelSelect');
+    const enhanceCheck  = document.getElementById('enhanceCheck');
 
     featherSlider.addEventListener('input', () => {
       featherVal.textContent = parseFloat(featherSlider.value).toFixed(1);
@@ -296,6 +309,23 @@
       countEl.textContent = files.length ? `${files.length} image${files.length > 1 ? 's' : ''}` : '';
     }
 
+    async function enhanceAlpha(blob) {
+      const img = await createImageBitmap(blob);
+      const { width, height } = img;
+      const c = new OffscreenCanvas(width, height);
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, width, height);
+      for (let i = 0; i < data.data.length; i += 4) {
+        let a = data.data[i + 3] / 255;
+        // S-curve: push semi-transparent pixels toward fully opaque or transparent
+        a = a < 0.5 ? 2 * a * a : 1 - Math.pow(-2 * a + 2, 2) / 2;
+        data.data[i + 3] = Math.round(a * 255);
+      }
+      ctx.putImageData(data, 0, 0);
+      return c.convertToBlob({ type: 'image/png' });
+    }
+
     async function featherAlpha(blob, radius) {
       if (radius === 0) return blob;
       const img = await createImageBitmap(blob);
@@ -339,8 +369,9 @@
       zipBtn.disabled = true;
       updateToolbar();
 
-      const model   = document.querySelector('input[name="model"]:checked').value;
+      const model   = modelSelect.value;
       const feather = parseFloat(featherSlider.value);
+      const enhance = enhanceCheck.checked;
       const config  = {
         publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/',
         model,
@@ -366,6 +397,10 @@
           modelReady = true;
           modelProg.style.display = 'none';
 
+          if (enhance) {
+            setStatus(i, 'working', 'Enhancing edges…');
+            blob = await enhanceAlpha(blob);
+          }
           if (feather > 0) {
             setStatus(i, 'working', 'Feathering…');
             blob = await featherAlpha(blob, feather);
