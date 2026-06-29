@@ -169,9 +169,7 @@
     ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/';
     ort.env.wasm.numThreads = 1;
 
-    // To use FP32 models from HuggingFace, replace './models' with your HF URL:
-    // const MODEL_BASE = 'https://huggingface.co/YOUR_USERNAME/rembg-models/resolve/main';
-    const MODEL_BASE = './models';
+    const MODEL_BASE = 'https://huggingface.co/lucasfaesa/rembg-models/resolve/main';
 
     const MODELS = {
       'isnet-anime':       { input: 'img',         output: 'mask',         size: 1024, norm: 'isnet', url: `${MODEL_BASE}/isnet-anime.onnx` },
