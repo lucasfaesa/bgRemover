@@ -455,6 +455,7 @@
           const name = files[i].name.replace(/\.[^.]+$/, '.png');
           const url  = URL.createObjectURL(blob);
           results.push({ name, blob, url });
+          zipBtn.disabled = false;
           document.getElementById(`thumb-${i}`).src = url;
           document.getElementById(`item-${i}`).classList.add('done');
           setStatus(i, 'done', '✓ Done');
