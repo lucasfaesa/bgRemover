@@ -78,6 +78,8 @@
     .btn-ghost:not(:disabled):hover { color: var(--text); border-color: #444; }
     .btn-danger { background: var(--surface2); color: var(--red); border: 1px solid #3d2a2a; }
     .btn-danger:not(:disabled):hover { background: #2e1a1a; border-color: var(--red); }
+    .btn-success { background: var(--green); color: #fff; font-weight: 600; border: none; }
+    .btn-success:not(:disabled):hover { background: #3a9465; }
     #count { color: var(--muted); font-size: 0.875rem; margin-left: auto; }
     #fileList { display: flex; flex-direction: column; gap: 8px; }
     .file-item {
@@ -453,7 +455,10 @@
           setStatus(i, 'error', '✕ Error'); console.error(err);
         }
       }
-      running = false; zipBtn.disabled = results.length === 0; updateToolbar();
+      running = false;
+      zipBtn.disabled = results.length === 0;
+      if (results.length > 0) zipBtn.className = 'btn-success';
+      updateToolbar();
     });
 
     zipBtn.addEventListener('click', async () => {
@@ -464,7 +469,9 @@
     });
 
     clearBtn.addEventListener('click', () => {
-      files = []; results = []; fileList.innerHTML = ''; zipBtn.disabled = true; updateToolbar();
+      files = []; results = []; fileList.innerHTML = '';
+      zipBtn.disabled = true; zipBtn.className = 'btn-secondary';
+      updateToolbar();
     });
   </script>
 </body>
