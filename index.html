@@ -169,10 +169,14 @@
     ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/';
     ort.env.wasm.numThreads = 1;
 
+    // To use FP32 models from HuggingFace, replace './models' with your HF URL:
+    // const MODEL_BASE = 'https://huggingface.co/YOUR_USERNAME/rembg-models/resolve/main';
+    const MODEL_BASE = './models';
+
     const MODELS = {
-      'isnet-anime':       { input: 'img',          output: 'mask',         size: 1024, norm: 'isnet' },
-      'isnet-general-use': { input: 'input_image',  output: 'output_image', size: 1024, norm: 'isnet' },
-      'u2net':             { input: 'input.1',       output: '1959',         size: 320,  norm: 'u2net' },
+      'isnet-anime':       { input: 'img',         output: 'mask',         size: 1024, norm: 'isnet', url: `${MODEL_BASE}/isnet-anime.onnx` },
+      'isnet-general-use': { input: 'input_image', output: 'output_image', size: 1024, norm: 'isnet', url: `${MODEL_BASE}/isnet-general-use.onnx` },
+      'u2net':             { input: 'input.1',     output: '1959',         size: 320,  norm: 'u2net', url: `${MODEL_BASE}/u2net.onnx` },
     };
     const sessions = {};
 
@@ -198,7 +202,7 @@
 
     async function loadModel(key, onProgress) {
       if (sessions[key]) return sessions[key];
-      const resp = await fetch(`./models/${key}.onnx`);
+      const resp = await fetch(MODELS[key].url);
       const total = parseInt(resp.headers.get('Content-Length') || '0');
       const reader = resp.body.getReader();
       const chunks = [];
@@ -260,19 +264,71 @@
       return rc.convertToBlob({ type: 'image/png' });
     }
 
-    async function enhanceAlpha(blob) {
-      const img = await createImageBitmap(blob);
-      const c = new OffscreenCanvas(img.width, img.height);
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const d = ctx.getImageData(0, 0, img.width, img.height);
-      for (let i = 0; i < d.data.length; i += 4) {
-        let a = d.data[i+3] / 255;
-        a = a < 0.5 ? 2*a*a : 1 - Math.pow(-2*a+2, 2)/2;
-        d.data[i+3] = Math.round(a * 255);
+    async function refineAlpha(resultBlob, originalFile) {
+      const [origBitmap, resBitmap] = await Promise.all([
+        createImageBitmap(originalFile),
+        createImageBitmap(resultBlob),
+      ]);
+      const { width, height } = origBitmap;
+      const N = width * height;
+      const r = 4, eps = 0.01;
+
+      const oc = new OffscreenCanvas(width, height);
+      oc.getContext('2d').drawImage(origBitmap, 0, 0);
+      const origPix = oc.getContext('2d').getImageData(0, 0, width, height).data;
+
+      const rc = new OffscreenCanvas(width, height);
+      rc.getContext('2d').drawImage(resBitmap, 0, 0);
+      const resAlpha = rc.getContext('2d').getImageData(0, 0, width, height).data;
+
+      const I = new Float32Array(N), p = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        I[i] = (0.299*origPix[i*4] + 0.587*origPix[i*4+1] + 0.114*origPix[i*4+2]) / 255;
+        p[i] = resAlpha[i*4+3] / 255;
       }
-      ctx.putImageData(d, 0, 0);
-      return c.convertToBlob({ type: 'image/png' });
+
+      // Box mean via integral image — O(N) per call
+      function boxMean(arr) {
+        const ii = new Float64Array((width+1) * (height+1));
+        for (let y = 0; y < height; y++)
+          for (let x = 0; x < width; x++)
+            ii[(y+1)*(width+1)+(x+1)] = arr[y*width+x]
+              + ii[y*(width+1)+(x+1)] + ii[(y+1)*(width+1)+x] - ii[y*(width+1)+x];
+        const out = new Float32Array(N), W = width + 1;
+        for (let y = 0; y < height; y++)
+          for (let x = 0; x < width; x++) {
+            const x1=Math.max(0,x-r), y1=Math.max(0,y-r);
+            const x2=Math.min(width-1,x+r), y2=Math.min(height-1,y+r);
+            out[y*width+x] = (ii[(y2+1)*W+(x2+1)] - ii[y1*W+(x2+1)]
+              - ii[(y2+1)*W+x1] + ii[y1*W+x1]) / ((x2-x1+1)*(y2-y1+1));
+          }
+        return out;
+      }
+
+      const mean_I = boxMean(I), mean_p = boxMean(p);
+      const Ip = new Float32Array(N), II = new Float32Array(N);
+      for (let i = 0; i < N; i++) { Ip[i] = I[i]*p[i]; II[i] = I[i]*I[i]; }
+      const mean_Ip = boxMean(Ip), mean_II = boxMean(II);
+
+      const a = new Float32Array(N), b = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        a[i] = (mean_Ip[i] - mean_I[i]*mean_p[i]) / (mean_II[i] - mean_I[i]*mean_I[i] + eps);
+        b[i] = mean_p[i] - a[i]*mean_I[i];
+      }
+      const mean_a = boxMean(a), mean_b = boxMean(b);
+
+      // Recombine: original RGB + refined alpha
+      const outData = new ImageData(width, height);
+      for (let i = 0; i < N; i++) {
+        outData.data[i*4]   = origPix[i*4];
+        outData.data[i*4+1] = origPix[i*4+1];
+        outData.data[i*4+2] = origPix[i*4+2];
+        outData.data[i*4+3] = Math.max(0, Math.min(255,
+          Math.round((mean_a[i]*I[i] + mean_b[i]) * 255)));
+      }
+      const out = new OffscreenCanvas(width, height);
+      out.getContext('2d').putImageData(outData, 0, 0);
+      return out.convertToBlob({ type: 'image/png' });
     }
 
     async function featherAlpha(blob, radius) {
@@ -380,7 +436,7 @@
             setStatus(i, 'working', `Downloading ${Math.round(pct * 100)}%`);
           });
           modelProg.style.display = 'none';
-          if (enhance) { setStatus(i, 'working', 'Enhancing…');  blob = await enhanceAlpha(blob); }
+          if (enhance) { setStatus(i, 'working', 'Refining edges…'); blob = await refineAlpha(blob, files[i]); }
           if (feather)  { setStatus(i, 'working', 'Feathering…'); blob = await featherAlpha(blob, feather); }
 
           const name = files[i].name.replace(/\.[^.]+$/, '.png');
