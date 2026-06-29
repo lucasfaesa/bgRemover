@@ -76,6 +76,8 @@
     .btn-secondary:not(:disabled):hover { border-color: var(--accent); }
     .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
     .btn-ghost:not(:disabled):hover { color: var(--text); border-color: #444; }
+    .btn-danger { background: var(--surface2); color: var(--red); border: 1px solid #3d2a2a; }
+    .btn-danger:not(:disabled):hover { background: #2e1a1a; border-color: var(--red); }
     #count { color: var(--muted); font-size: 0.875rem; margin-left: auto; }
     #fileList { display: flex; flex-direction: column; gap: 8px; }
     .file-item {
@@ -157,7 +159,7 @@
   <div class="toolbar">
     <button class="btn-primary"   id="processBtn" disabled>Remove Backgrounds</button>
     <button class="btn-secondary" id="zipBtn"     disabled>Download All as ZIP</button>
-    <button class="btn-secondary" id="clearBtn"   disabled>Clear List</button>
+    <button class="btn-danger"    id="clearBtn"   disabled>Clear List</button>
     <span id="count"></span>
   </div>
 
