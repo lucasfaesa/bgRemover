@@ -7,123 +7,67 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0d0d0d;
-      --surface: #1a1a1a;
-      --surface2: #222;
-      --border: #2a2a2a;
-      --accent: #4f8ef7;
-      --text: #e8e8e8;
-      --muted: #666;
-      --green: #4caf7d;
-      --red: #e05c5c;
+      --bg: #0d0d0d; --surface: #1a1a1a; --surface2: #222;
+      --border: #2a2a2a; --accent: #4f8ef7; --text: #e8e8e8;
+      --muted: #666; --green: #4caf7d; --red: #e05c5c;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      max-width: 780px;
-      margin: 0 auto;
-      padding: 32px 20px 60px;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; max-width: 780px;
+      margin: 0 auto; padding: 32px 20px 60px;
     }
     h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 6px; }
     .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
-
-    /* Drop zone — using <label> so click works natively everywhere */
     #dropzone {
-      display: block;
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 48px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-      margin-bottom: 16px;
+      display: block; border: 2px dashed var(--border); border-radius: 12px;
+      padding: 48px 20px; text-align: center; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s; margin-bottom: 16px;
     }
     #dropzone.over, #dropzone:hover { border-color: var(--accent); background: #0f1a2e; }
     .drop-icon { font-size: 2rem; margin-bottom: 10px; }
     #dropzone p { color: var(--muted); font-size: 0.9rem; }
     #dropzone strong { color: var(--text); }
     #fileInput { display: none; }
-
-    /* Options */
     .options {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 16px;
-      display: flex;
-      gap: 28px;
-      align-items: center;
-      flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 16px;
+      display: flex; gap: 28px; align-items: flex-end; flex-wrap: wrap;
     }
     .opt-group { display: flex; flex-direction: column; gap: 6px; }
     .opt-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
     select {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 7px;
-      padding: 6px 10px;
-      font-size: 0.875rem;
-      font-family: inherit;
-      cursor: pointer;
-      outline: none;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 7px; padding: 6px 10px;
+      font-size: 0.875rem; font-family: inherit; cursor: pointer; outline: none;
     }
     select:focus { border-color: var(--accent); }
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.875rem;
-      cursor: pointer;
-      color: var(--text);
-      white-space: nowrap;
-    }
-    input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
     .slider-row { display: flex; align-items: center; gap: 10px; }
     input[type=range] {
-      -webkit-appearance: none;
-      width: 140px;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--border);
-      outline: none;
+      -webkit-appearance: none; width: 140px; height: 4px;
+      border-radius: 2px; background: var(--border); outline: none;
     }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--accent); cursor: pointer;
     }
     #featherVal { font-size: 0.83rem; color: var(--text); min-width: 24px; }
-
-    /* Model download progress */
-    #modelProgress {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 16px;
-      font-size: 0.875rem;
+    .checkbox-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.875rem; cursor: pointer; color: var(--text); white-space: nowrap;
     }
-    #modelProgress .label { color: var(--muted); margin-bottom: 8px; }
+    input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+    #modelProgress {
+      display: none; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; font-size: 0.875rem;
+    }
+    .prog-label { color: var(--muted); margin-bottom: 8px; }
     .bar-wrap { background: var(--border); border-radius: 4px; height: 4px; overflow: hidden; }
-    .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.2s; width: 0%; }
-
-    /* Toolbar */
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.1s; width: 0%; }
     .toolbar { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
     button {
-      padding: 9px 20px;
-      border-radius: 8px;
-      border: none;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: opacity 0.15s, background 0.15s;
-      font-family: inherit;
+      padding: 9px 20px; border-radius: 8px; border: none;
+      font-size: 0.9rem; cursor: pointer; transition: opacity 0.15s, background 0.15s; font-family: inherit;
     }
     button:disabled { opacity: 0.4; cursor: default; }
     .btn-primary { background: var(--accent); color: #fff; font-weight: 600; }
@@ -133,35 +77,23 @@
     .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
     .btn-ghost:not(:disabled):hover { color: var(--text); border-color: #444; }
     #count { color: var(--muted); font-size: 0.875rem; margin-left: auto; }
-
-    /* File list */
     #fileList { display: flex; flex-direction: column; gap: 8px; }
     .file-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      transition: border-color 0.15s;
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; transition: border-color 0.15s;
     }
     .file-item.done  { border-color: #2a3d2e; }
     .file-item.error { border-color: #3d2a2a; }
     .thumb {
-      width: 48px; height: 48px;
-      object-fit: contain;
-      border-radius: 6px;
+      width: 48px; height: 48px; object-fit: contain; border-radius: 6px;
       background: repeating-conic-gradient(#2a2a2a 0% 25%, #1a1a1a 0% 50%) 0 0 / 12px 12px;
       flex-shrink: 0;
     }
     .file-info { flex: 1; min-width: 0; }
     .file-name { font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .file-size { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
-    .status-badge {
-      font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;
-      white-space: nowrap; flex-shrink: 0;
-    }
+    .status-badge { font-size: 0.78rem; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
     .status-pending { background: #252525; color: var(--muted); }
     .status-working { background: #1a2a3a; color: #7ab3f7; }
     .status-done    { background: #1a2e1f; color: var(--green); }
@@ -172,7 +104,6 @@
       color: var(--text); cursor: pointer; flex-shrink: 0; font-family: inherit;
     }
     .dl-btn:hover { border-color: var(--accent); }
-
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner {
       display: inline-block; width: 12px; height: 12px;
@@ -197,8 +128,9 @@
     <div class="opt-group">
       <div class="opt-label">Model</div>
       <select id="modelSelect">
-        <option value="small">General (faster)</option>
-        <option value="medium" selected>Quality (recommended)</option>
+        <option value="isnet-anime">Anime / Illustrations</option>
+        <option value="isnet-general-use">High quality (isnet)</option>
+        <option value="u2net">General (u2net)</option>
       </select>
     </div>
     <div class="opt-group">
@@ -208,7 +140,7 @@
         <span id="featherVal">1.0</span>
       </div>
     </div>
-    <div class="opt-group" style="justify-content:flex-end;">
+    <div class="opt-group">
       <div class="opt-label">&nbsp;</div>
       <label class="checkbox-label">
         <input type="checkbox" id="enhanceCheck">
@@ -218,8 +150,8 @@
   </div>
 
   <div id="modelProgress">
-    <div class="label" id="modelLabel">Downloading model (first run only)…</div>
-    <div class="bar-wrap"><div class="bar-fill" id="modelBar"></div></div>
+    <div class="prog-label" id="progLabel">Downloading model…</div>
+    <div class="bar-wrap"><div class="bar-fill" id="progBar"></div></div>
   </div>
 
   <div class="toolbar">
@@ -231,50 +163,174 @@
 
   <div id="fileList"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script type="module">
-    import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/background-removal.browser.esm.js';
+    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/';
+    ort.env.wasm.numThreads = 1;
 
-    let files = [], results = [], running = false, modelReady = false;
+    const MODELS = {
+      'isnet-anime':       { input: 'img',          output: 'mask',         size: 1024, norm: 'isnet' },
+      'isnet-general-use': { input: 'input_image',  output: 'output_image', size: 1024, norm: 'isnet' },
+      'u2net':             { input: 'input.1',       output: '1959',         size: 320,  norm: 'u2net' },
+    };
+    const sessions = {};
 
-    const fileInput  = document.getElementById('fileInput');
-    const dropzone   = document.getElementById('dropzone');
-    const fileList   = document.getElementById('fileList');
-    const processBtn = document.getElementById('processBtn');
-    const zipBtn     = document.getElementById('zipBtn');
-    const clearBtn   = document.getElementById('clearBtn');
-    const countEl    = document.getElementById('count');
-    const modelProg  = document.getElementById('modelProgress');
-    const modelBar   = document.getElementById('modelBar');
-    const modelLabel = document.getElementById('modelLabel');
+    function buildTensor(imageData, size, norm) {
+      const d = imageData.data, n = size * size;
+      const t = new Float32Array(3 * n);
+      if (norm === 'isnet') {
+        for (let i = 0; i < n; i++) {
+          t[i]       = d[i*4]   / 255 - 0.5;
+          t[n+i]     = d[i*4+1] / 255 - 0.5;
+          t[2*n+i]   = d[i*4+2] / 255 - 0.5;
+        }
+      } else {
+        const mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225];
+        for (let i = 0; i < n; i++) {
+          t[i]       = (d[i*4]   / 255 - mean[0]) / std[0];
+          t[n+i]     = (d[i*4+1] / 255 - mean[1]) / std[1];
+          t[2*n+i]   = (d[i*4+2] / 255 - mean[2]) / std[2];
+        }
+      }
+      return t;
+    }
+
+    async function loadModel(key, onProgress) {
+      if (sessions[key]) return sessions[key];
+      const resp = await fetch(`./models/${key}.onnx`);
+      const total = parseInt(resp.headers.get('Content-Length') || '0');
+      const reader = resp.body.getReader();
+      const chunks = [];
+      let loaded = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+        if (total > 0) onProgress(loaded / total);
+      }
+      const buf = new Uint8Array(loaded);
+      let off = 0;
+      for (const c of chunks) { buf.set(c, off); off += c.length; }
+      sessions[key] = await ort.InferenceSession.create(buf.buffer, { executionProviders: ['wasm'] });
+      return sessions[key];
+    }
+
+    async function runModel(file, key, onProgress) {
+      const cfg = MODELS[key];
+      const session = await loadModel(key, onProgress);
+
+      const img = await createImageBitmap(file);
+      const tmp = new OffscreenCanvas(cfg.size, cfg.size);
+      tmp.getContext('2d').drawImage(img, 0, 0, cfg.size, cfg.size);
+      const imgData = tmp.getContext('2d').getImageData(0, 0, cfg.size, cfg.size);
+
+      const tensor = new ort.Tensor('float32', buildTensor(imgData, cfg.size, cfg.norm), [1, 3, cfg.size, cfg.size]);
+      const out = await session.run({ [cfg.input]: tensor });
+      const raw = out[cfg.output].data;
+
+      let lo = Infinity, hi = -Infinity;
+      const sig = new Float32Array(raw.length);
+      for (let i = 0; i < raw.length; i++) {
+        sig[i] = 1 / (1 + Math.exp(-raw[i]));
+        if (sig[i] < lo) lo = sig[i];
+        if (sig[i] > hi) hi = sig[i];
+      }
+      const range = Math.max(hi - lo, 1e-8);
+
+      const mc = new OffscreenCanvas(cfg.size, cfg.size);
+      const mctx = mc.getContext('2d');
+      const md = mctx.createImageData(cfg.size, cfg.size);
+      for (let i = 0; i < sig.length; i++) {
+        const v = Math.round((sig[i] - lo) / range * 255);
+        md.data[i*4] = md.data[i*4+1] = md.data[i*4+2] = v;
+        md.data[i*4+3] = 255;
+      }
+      mctx.putImageData(md, 0, 0);
+
+      const rc = new OffscreenCanvas(img.width, img.height);
+      const rctx = rc.getContext('2d');
+      rctx.drawImage(mc, 0, 0, img.width, img.height);
+      const scaled = rctx.getImageData(0, 0, img.width, img.height);
+      rctx.drawImage(img, 0, 0);
+      const pix = rctx.getImageData(0, 0, img.width, img.height);
+      for (let i = 0; i < pix.data.length / 4; i++) pix.data[i*4+3] = scaled.data[i*4];
+      rctx.putImageData(pix, 0, 0);
+      return rc.convertToBlob({ type: 'image/png' });
+    }
+
+    async function enhanceAlpha(blob) {
+      const img = await createImageBitmap(blob);
+      const c = new OffscreenCanvas(img.width, img.height);
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const d = ctx.getImageData(0, 0, img.width, img.height);
+      for (let i = 0; i < d.data.length; i += 4) {
+        let a = d.data[i+3] / 255;
+        a = a < 0.5 ? 2*a*a : 1 - Math.pow(-2*a+2, 2)/2;
+        d.data[i+3] = Math.round(a * 255);
+      }
+      ctx.putImageData(d, 0, 0);
+      return c.convertToBlob({ type: 'image/png' });
+    }
+
+    async function featherAlpha(blob, radius) {
+      if (!radius) return blob;
+      const img = await createImageBitmap(blob);
+      const { width, height } = img;
+      const base = new OffscreenCanvas(width, height);
+      const bctx = base.getContext('2d');
+      bctx.drawImage(img, 0, 0);
+      const data = bctx.getImageData(0, 0, width, height);
+      const ac = new OffscreenCanvas(width, height);
+      const actx = ac.getContext('2d');
+      const ad = actx.createImageData(width, height);
+      for (let i = 0; i < data.data.length; i += 4) {
+        ad.data[i] = ad.data[i+1] = ad.data[i+2] = data.data[i+3];
+        ad.data[i+3] = 255;
+      }
+      actx.putImageData(ad, 0, 0);
+      const bc = new OffscreenCanvas(width, height);
+      const bctx2 = bc.getContext('2d');
+      bctx2.filter = `blur(${radius}px)`;
+      bctx2.drawImage(ac, 0, 0);
+      const bd = bctx2.getImageData(0, 0, width, height);
+      for (let i = 0; i < data.data.length; i += 4) data.data[i+3] = bd.data[i];
+      base.getContext('2d').putImageData(data, 0, 0);
+      return base.convertToBlob({ type: 'image/png' });
+    }
+
+    // UI
+    let files = [], results = [], running = false;
+    const fileInput     = document.getElementById('fileInput');
+    const dropzone      = document.getElementById('dropzone');
+    const fileList      = document.getElementById('fileList');
+    const processBtn    = document.getElementById('processBtn');
+    const zipBtn        = document.getElementById('zipBtn');
+    const clearBtn      = document.getElementById('clearBtn');
+    const countEl       = document.getElementById('count');
+    const modelSelect   = document.getElementById('modelSelect');
     const featherSlider = document.getElementById('feather');
     const featherVal    = document.getElementById('featherVal');
-    const modelSelect   = document.getElementById('modelSelect');
     const enhanceCheck  = document.getElementById('enhanceCheck');
+    const modelProg     = document.getElementById('modelProgress');
+    const progBar       = document.getElementById('progBar');
+    const progLabel     = document.getElementById('progLabel');
 
-    featherSlider.addEventListener('input', () => {
-      featherVal.textContent = parseFloat(featherSlider.value).toFixed(1);
-    });
+    featherSlider.addEventListener('input', () =>
+      featherVal.textContent = parseFloat(featherSlider.value).toFixed(1));
 
-    // Drag & drop (label handles click natively)
     dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('over'); });
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('over'));
-    dropzone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropzone.classList.remove('over');
-      addFiles([...e.dataTransfer.files]);
-    });
+    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('over'); addFiles([...e.dataTransfer.files]); });
     fileInput.addEventListener('change', () => addFiles([...fileInput.files]));
 
-    function fmt(b) {
-      return b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
-    }
+    function fmt(b) { return b < 1048576 ? (b/1024).toFixed(0)+' KB' : (b/1048576).toFixed(1)+' MB'; }
 
     function addFiles(incoming) {
       files = [...files, ...incoming.filter(f => f.type.startsWith('image/'))];
-      results = [];
-      renderList();
-      updateToolbar();
+      results = []; renderList(); updateToolbar();
     }
 
     function renderList() {
@@ -282,16 +338,14 @@
       files.forEach((f, i) => {
         const url = URL.createObjectURL(f);
         const item = document.createElement('div');
-        item.className = 'file-item';
-        item.id = `item-${i}`;
+        item.className = 'file-item'; item.id = `item-${i}`;
         item.innerHTML = `
           <img class="thumb" src="${url}" id="thumb-${i}">
           <div class="file-info">
             <div class="file-name">${f.name}</div>
             <div class="file-size">${fmt(f.size)}</div>
           </div>
-          <span class="status-badge status-pending" id="status-${i}">Pending</span>
-        `;
+          <span class="status-badge status-pending" id="status-${i}">Pending</span>`;
         fileList.appendChild(item);
       });
     }
@@ -309,143 +363,52 @@
       countEl.textContent = files.length ? `${files.length} image${files.length > 1 ? 's' : ''}` : '';
     }
 
-    async function enhanceAlpha(blob) {
-      const img = await createImageBitmap(blob);
-      const { width, height } = img;
-      const c = new OffscreenCanvas(width, height);
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const data = ctx.getImageData(0, 0, width, height);
-      for (let i = 0; i < data.data.length; i += 4) {
-        let a = data.data[i + 3] / 255;
-        // S-curve: push semi-transparent pixels toward fully opaque or transparent
-        a = a < 0.5 ? 2 * a * a : 1 - Math.pow(-2 * a + 2, 2) / 2;
-        data.data[i + 3] = Math.round(a * 255);
-      }
-      ctx.putImageData(data, 0, 0);
-      return c.convertToBlob({ type: 'image/png' });
-    }
-
-    async function featherAlpha(blob, radius) {
-      if (radius === 0) return blob;
-      const img = await createImageBitmap(blob);
-      const { width, height } = img;
-
-      const base = new OffscreenCanvas(width, height);
-      const bctx = base.getContext('2d');
-      bctx.drawImage(img, 0, 0);
-      const data = bctx.getImageData(0, 0, width, height);
-
-      // alpha → greyscale canvas
-      const ac = new OffscreenCanvas(width, height);
-      const actx = ac.getContext('2d');
-      const ad = actx.createImageData(width, height);
-      for (let i = 0; i < data.data.length; i += 4) {
-        ad.data[i] = ad.data[i+1] = ad.data[i+2] = data.data[i+3];
-        ad.data[i+3] = 255;
-      }
-      actx.putImageData(ad, 0, 0);
-
-      // blur the greyscale alpha
-      const bc = new OffscreenCanvas(width, height);
-      const bctx2 = bc.getContext('2d');
-      bctx2.filter = `blur(${radius}px)`;
-      bctx2.drawImage(ac, 0, 0);
-      const bd = bctx2.getImageData(0, 0, width, height);
-
-      // write blurred alpha back
-      for (let i = 0; i < data.data.length; i += 4) {
-        data.data[i+3] = bd.data[i];
-      }
-      const rc = new OffscreenCanvas(width, height);
-      rc.getContext('2d').putImageData(data, 0, 0);
-      return rc.convertToBlob({ type: 'image/png' });
-    }
-
     processBtn.addEventListener('click', async () => {
       if (running) return;
-      running = true;
-      results = [];
-      zipBtn.disabled = true;
-      updateToolbar();
-
-      const model   = modelSelect.value;
+      running = true; results = []; zipBtn.disabled = true; updateToolbar();
+      const key     = modelSelect.value;
       const feather = parseFloat(featherSlider.value);
       const enhance = enhanceCheck.checked;
-      const config  = {
-        publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/',
-        model,
-        output: { format: 'image/png', quality: 1 },
-      };
 
       for (let i = 0; i < files.length; i++) {
-        setStatus(i, 'working', modelReady ? 'Processing…' : 'Loading model…');
+        setStatus(i, 'working', sessions[key] ? 'Processing…' : 'Loading model…');
         try {
-          let blob = await removeBackground(files[i], {
-            ...config,
-            progress: (key, current, total) => {
-              if (!modelReady && key.startsWith('fetch:') && total > 0) {
-                const pct = Math.round(current / total * 100);
-                modelProg.style.display = 'block';
-                modelBar.style.width = pct + '%';
-                modelLabel.textContent = `Downloading model… ${pct}%`;
-                setStatus(i, 'working', `Model ${pct}%`);
-              }
-            },
+          let blob = await runModel(files[i], key, pct => {
+            modelProg.style.display = 'block';
+            progBar.style.width = (pct * 100) + '%';
+            progLabel.textContent = `Downloading model… ${Math.round(pct * 100)}%`;
+            setStatus(i, 'working', `Downloading ${Math.round(pct * 100)}%`);
           });
-
-          modelReady = true;
           modelProg.style.display = 'none';
-
-          if (enhance) {
-            setStatus(i, 'working', 'Enhancing edges…');
-            blob = await enhanceAlpha(blob);
-          }
-          if (feather > 0) {
-            setStatus(i, 'working', 'Feathering…');
-            blob = await featherAlpha(blob, feather);
-          }
+          if (enhance) { setStatus(i, 'working', 'Enhancing…');  blob = await enhanceAlpha(blob); }
+          if (feather)  { setStatus(i, 'working', 'Feathering…'); blob = await featherAlpha(blob, feather); }
 
           const name = files[i].name.replace(/\.[^.]+$/, '.png');
           const url  = URL.createObjectURL(blob);
           results.push({ name, blob, url });
-
           document.getElementById(`thumb-${i}`).src = url;
           document.getElementById(`item-${i}`).classList.add('done');
           setStatus(i, 'done', '✓ Done');
-
           const dlBtn = document.createElement('button');
-          dlBtn.className = 'dl-btn';
-          dlBtn.textContent = '↓';
-          dlBtn.title = 'Download';
-          dlBtn.addEventListener('click', () => Object.assign(document.createElement('a'), { href: url, download: name }).click());
+          dlBtn.className = 'dl-btn'; dlBtn.textContent = '↓'; dlBtn.title = 'Download';
+          dlBtn.onclick = () => Object.assign(document.createElement('a'), { href: url, download: name }).click();
           document.getElementById(`item-${i}`).appendChild(dlBtn);
         } catch (err) {
-          setStatus(i, 'error', '✕ Error');
-          console.error(err);
+          setStatus(i, 'error', '✕ Error'); console.error(err);
         }
       }
-
-      running = false;
-      zipBtn.disabled = results.length === 0;
-      updateToolbar();
+      running = false; zipBtn.disabled = results.length === 0; updateToolbar();
     });
 
     zipBtn.addEventListener('click', async () => {
       const zip = new JSZip();
       for (const { name, blob } of results) zip.file(name, blob);
       const out = await zip.generateAsync({ type: 'blob' });
-      Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(out),
-        download: 'removed-backgrounds.zip',
-      }).click();
+      Object.assign(document.createElement('a'), { href: URL.createObjectURL(out), download: 'removed-backgrounds.zip' }).click();
     });
 
     clearBtn.addEventListener('click', () => {
-      files = []; results = [];
-      fileList.innerHTML = '';
-      zipBtn.disabled = true;
-      updateToolbar();
+      files = []; results = []; fileList.innerHTML = ''; zipBtn.disabled = true; updateToolbar();
     });
   </script>
 </body>
